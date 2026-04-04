@@ -2,10 +2,9 @@
  * MCP Transport Route Handler
  * 
  * Main entry point for the MCP server.
- * Uses mcp-handler to support both Streamable HTTP and SSE transports.
+ * Uses mcp-handler with Streamable HTTP transport (SSE disabled for serverless).
  * 
  * Endpoint: /api/mcp
- * Supported transports: streamable-http, sse
  */
 
 import { createMcpHandler } from 'mcp-handler';
@@ -26,6 +25,7 @@ const handler = createMcpHandler(
   },
   {
     basePath: '/api/mcp',
+    disableSse: true,
   }
 );
 
