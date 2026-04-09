@@ -1,10 +1,8 @@
 /**
  * OAuth Protected Resource Metadata (RFC 9728)
  * 
- * This endpoint tells Claude (and other MCP clients) that this server
- * requires OAuth authentication and where to find the Authorization Server.
- * 
- * Claude automatically fetches this when connecting to the MCP.
+ * Served via rewrite from /.well-known/oauth-protected-resource → /api/oauth-metadata
+ * This endpoint tells Claude where to authenticate (Auth0).
  */
 
 import { config } from '@/src/config/env';
