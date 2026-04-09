@@ -1,28 +1,76 @@
 /**
- * MCP Route Handler — Stateless Streamable HTTP
+ * MCP Route Handler — Stateless Streamable HTTP + OAuth 2.1
  * 
  * Uses the official @modelcontextprotocol/sdk with WebStandardStreamableHTTPServerTransport.
- * Fully stateless, no Redis, returns JSON responses (not SSE streams).
+ * Validates Auth0 JWT tokens and filters tools based on user permissions.
  * 
  * Endpoint: POST /api/mcp
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
+import { validateToken } from '@/src/auth/validate';
+import { getUserPermissions } from '@/src/auth/permissions';
 import { registerTools } from '@/src/tools/register';
 
 export async function POST(req: Request) {
-  // Create a fresh server + transport per request (stateless)
+  // --- 1. Authenticate ---
+  const user = await validateToken(req);
+
+  if (!user) {
+    return new Response(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized. A valid Auth0 access token is required.',
+        },
+        id: null,
+      }),
+      {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'WWW-Authenticate': 'Bearer',
+        },
+      }
+    );
+  }
+
+  // --- 2. Authorize ---
+  const permissions = getUserPermissions(user.email);
+
+  if (!permissions) {
+    return new Response(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        error: {
+          code: -32003,
+          message: `Access denied. User ${user.email} is not authorized to use this MCP server.`,
+        },
+        id: null,
+      }),
+      { status: 403, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // --- 3. Create MCP server with filtered tools ---
   const server = new McpServer({
     name: 'immoral-finance-mcp',
     version: '1.0.0',
   });
 
-  registerTools(server);
+  // Register only the tools this user is allowed to see
+  registerTools(server, {
+    allowedTools: permissions.allowedTools === '*' ? undefined : [...permissions.allowedTools],
+    dept: permissions.dept,
+    userContext: permissions.context,
+    userName: permissions.name,
+  });
 
   const transport = new WebStandardStreamableHTTPServerTransport({
-    sessionIdGenerator: undefined, // stateless — no session tracking
-    enableJsonResponse: true,      // JSON responses, not SSE — critical for serverless
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true,
   });
 
   await server.connect(transport);

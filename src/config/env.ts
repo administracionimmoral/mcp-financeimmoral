@@ -30,6 +30,14 @@ export const config = {
 
   /** Log level */
   logLevel: optionalEnv('LOG_LEVEL', 'info') as 'debug' | 'info' | 'warn' | 'error',
+
+  // --- Auth0 OAuth 2.1 ---
+
+  /** Auth0 tenant domain (e.g., dev-xxx.us.auth0.com) */
+  auth0Domain: requireEnv('AUTH0_DOMAIN'),
+
+  /** Auth0 API audience/identifier */
+  auth0Audience: requireEnv('AUTH0_AUDIENCE'),
 } as const;
 
 export type Config = typeof config;
