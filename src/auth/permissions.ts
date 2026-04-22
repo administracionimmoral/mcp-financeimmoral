@@ -94,6 +94,12 @@ export const USER_PERMISSIONS: Record<string, UserPermission> = {
     allowedTools: '*',
     context: 'Full admin access to all financial data.',
   },
+  'administracion@immoral.es': {
+    name: 'Daniel',
+    role: 'admin',
+    allowedTools: '*',
+    context: 'Full admin access to all financial data.',
+  },
 
   // ---- Department Heads: restricted to their dept ----
   'alba@immoral.es': {
