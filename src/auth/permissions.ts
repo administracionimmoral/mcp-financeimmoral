@@ -11,8 +11,14 @@
 
 // ============================================
 // All tool names (for reference)
+//
+// The first block is the original read-only set (also exposed to dept
+// heads via DEPT_HEAD_TOOLS below). The "Admin-only extras" blocks
+// were added later to expose the full Finance API surface — they are
+// NOT included in DEPT_HEAD_TOOLS, so only admin users receive them.
 // ============================================
 const ALL_TOOLS = [
+  // ---- Core (admin + dept-head allowed) ----
   'get_billing_matrix',
   'get_billing_records',
   'list_clients',
@@ -33,6 +39,76 @@ const ALL_TOOLS = [
   'get_partner_commissions_by_month',
   'get_partner_commissions_annual',
   'list_users',
+  // ---- Admin-only extras: P&L ----
+  'get_pl_notes', 'save_pl_note', 'set_pl_note_status', 'save_pl_matrix_cell',
+  'list_pl_custom_rows', 'create_pl_custom_row', 'delete_pl_custom_row', 'update_pl_custom_row',
+  // ---- Admin-only extras: Periods ----
+  'close_period', 'reopen_period', 'get_period_status', 'list_periods',
+  // ---- Admin-only extras: Billing ----
+  'save_billing_matrix_cell', 'delete_billing_row', 'duplicate_billing_row', 'calculate_billing',
+  'get_client_billing_for_period', 'update_billing_record',
+  'add_billing_detail', 'update_billing_detail', 'delete_billing_detail',
+  'get_billing_client_month_detail', 'get_billing_annual_client_summary',
+  'list_billing_hidden_clients', 'hide_billing_client', 'unhide_billing_client',
+  // ---- Admin-only extras: Expenses ----
+  'prorate_expenses_preview', 'prorate_expenses_execute',
+  'create_expense', 'update_expense', 'delete_expense',
+  // ---- Admin-only extras: Media ----
+  'list_media_platforms', 'get_media_investment',
+  'set_media_planned_investment', 'set_media_platform_investment',
+  'list_media_hidden_clients', 'unhide_media_client', 'hide_media_client',
+  // ---- Admin-only extras: Fees ----
+  'get_client_fee_tiers', 'set_client_fee_tiers',
+  'get_platform_cost_rules', 'add_platform_cost_rule',
+  // ---- Admin-only extras: Clients ----
+  'create_client', 'update_client', 'delete_client', 'duplicate_client',
+  // ---- Admin-only extras: Payments ----
+  'create_payment_beneficiary', 'update_payment_beneficiary', 'delete_payment_beneficiary',
+  'list_payments_for_period', 'create_payment', 'update_payment',
+  'set_payment_status', 'delete_payment',
+  // ---- Admin-only extras: Imsales ----
+  'list_imsales_services', 'get_imsales_billing', 'save_imsales_billing',
+  'hide_imsales_client', 'unhide_imsales_client', 'list_imsales_hidden_clients',
+  // ---- Admin-only extras: Budget Requests ----
+  'get_budget_requests_summary', 'get_budget_requests_by_dept', 'list_budget_requests',
+  'create_budget_request', 'bulk_create_budget_requests',
+  'approve_budget_request', 'reject_budget_request',
+  'approve_budget_requests_by_dept', 'reject_budget_requests_by_dept',
+  'delete_budget_requests_by_dept', 'delete_budget_request',
+  // ---- Admin-only extras: Nutfruit / ICEX ----
+  'get_nutfruit', 'save_nutfruit_cell', 'create_nutfruit_row', 'delete_nutfruit_row',
+  'get_icex', 'save_icex_cell', 'create_icex_row', 'delete_icex_row',
+  // ---- Admin-only extras: Profitability / ClickUp ----
+  'get_clickup_status', 'refresh_clickup_cache',
+  'list_clickup_spaces', 'list_clickup_lists_for_space',
+  'debug_clickup_entries', 'clickup_lists_with_time', 'list_clickup_members',
+  'auto_match_profitability_clients',
+  'get_profitability_user_mappings', 'get_profitability_auto_mapping',
+  'set_profitability_user_mappings',
+  'get_profitability_client_lists', 'set_profitability_client_lists',
+  'get_profitability_accounts',
+  'list_manual_persons', 'create_manual_person', 'update_manual_person', 'delete_manual_person',
+  'list_manual_hours', 'upsert_manual_hours', 'delete_manual_hours',
+  'list_profitability_hidden_items', 'hide_profitability_item', 'unhide_profitability_item',
+  // ---- Admin-only extras: Payment Links ----
+  'create_payment_link_from_invoice', 'create_manual_payment_link',
+  'list_payment_links', 'get_payment_link',
+  'send_payment_link_email', 'cancel_payment_link',
+  // ---- Admin-only extras: Events (billing-service) ----
+  'record_invoice_issued', 'events_health',
+  // ---- Admin-only extras: Partners ----
+  'create_partner', 'assign_client_to_partner', 'delete_partner',
+  'calculate_partner_commissions', 'create_partner_commission', 'update_partner_commission',
+  // ---- Admin-only extras: Platforms ----
+  'list_platforms', 'create_platform', 'create_platform_commission',
+  'get_platform_commissions', 'update_platform_commission', 'mark_platform_commission_received',
+  // ---- Admin-only extras: Payment Requests ----
+  'create_payment_request', 'list_payment_requests', 'get_payment_request',
+  'update_payment_request', 'delete_payment_request',
+  // ---- Admin-only extras: Payroll & Employees ----
+  'list_employees_filtered', 'create_employee', 'update_employee_salary', 'update_employee',
+  'delete_employee_permanent', 'delete_employee',
+  'create_payroll', 'update_payroll', 'set_payroll_splits',
 ] as const;
 
 // ============================================
