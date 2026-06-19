@@ -8,6 +8,8 @@ import { buildSuccess, buildErrorFromUnknown } from '@/src/lib/response';
 import { logger } from '@/src/lib/logging';
 import type { ToolResponse } from '@/src/types';
 
+type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+
 interface ExecuteToolOptions {
   /** Tool name */
   tool: string;
@@ -16,18 +18,28 @@ interface ExecuteToolOptions {
   /** REST endpoint path (with interpolated values) */
   path: string;
   /** Optional query parameters */
-  queryParams?: Record<string, string | number>;
+  queryParams?: Record<string, string | number | boolean | undefined>;
+  /** HTTP method (defaults to GET) */
+  method?: HttpMethod;
+  /** Optional JSON body for POST/PATCH/PUT/DELETE */
+  body?: unknown;
 }
 
 /**
  * Execute a tool: call the upstream API, build the response
  */
 export async function executeTool(options: ExecuteToolOptions): Promise<ToolResponse> {
-  const { tool, params, path, queryParams } = options;
+  const { tool, params, path, queryParams, method = 'GET', body } = options;
 
-  const source = queryParams
-    ? `${path}?${new URLSearchParams(Object.entries(queryParams).map(([k, v]) => [k, String(v)])).toString()}`
-    : path;
+  const filteredQuery = queryParams
+    ? Object.fromEntries(
+        Object.entries(queryParams).filter(([, v]) => v !== undefined)
+      ) as Record<string, string | number | boolean>
+    : undefined;
+
+  const source = filteredQuery && Object.keys(filteredQuery).length > 0
+    ? `${method} ${path}?${new URLSearchParams(Object.entries(filteredQuery).map(([k, v]) => [k, String(v)])).toString()}`
+    : `${method} ${path}`;
 
   logger.toolInvocation(tool, params, source);
 
@@ -36,7 +48,9 @@ export async function executeTool(options: ExecuteToolOptions): Promise<ToolResp
   try {
     const data = await callFinanceApi({
       path,
-      queryParams,
+      queryParams: filteredQuery,
+      method,
+      body,
     });
 
     const durationMs = Date.now() - startTime;

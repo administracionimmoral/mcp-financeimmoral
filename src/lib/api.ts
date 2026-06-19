@@ -12,11 +12,17 @@ import { config } from '@/src/config/env';
 import { McpToolError, upstreamError, timeoutError, malformedResponseError, internalError } from '@/src/lib/errors';
 import { logger } from '@/src/lib/logging';
 
+type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+
 interface ApiCallOptions {
   /** The API path (e.g., /billing/matrix) — will be appended to FINANCE_API_BASE_URL + /api */
   path: string;
   /** Optional query parameters */
-  queryParams?: Record<string, string | number>;
+  queryParams?: Record<string, string | number | boolean | undefined>;
+  /** HTTP method (defaults to GET) */
+  method?: HttpMethod;
+  /** Optional JSON body for POST/PATCH/PUT/DELETE */
+  body?: unknown;
 }
 
 /**
@@ -24,7 +30,7 @@ interface ApiCallOptions {
  * @returns Parsed JSON data from the upstream API
  */
 export async function callFinanceApi<T = unknown>(options: ApiCallOptions): Promise<T> {
-  const { path, queryParams } = options;
+  const { path, queryParams, method = 'GET', body } = options;
 
   // Build URL
   const baseUrl = config.financeApiBaseUrl.replace(/\/+$/, '');
@@ -32,6 +38,7 @@ export async function callFinanceApi<T = unknown>(options: ApiCallOptions): Prom
 
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
+      if (value === undefined) continue;
       url.searchParams.set(key, String(value));
     }
   }
@@ -47,12 +54,13 @@ export async function callFinanceApi<T = unknown>(options: ApiCallOptions): Prom
 
   try {
     const response = await fetch(url.toString(), {
-      method: 'GET',
+      method,
       headers: {
         'x-api-key': config.financeApiKey,
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
+      body: body !== undefined && method !== 'GET' ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
 
