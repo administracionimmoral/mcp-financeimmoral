@@ -2,7 +2,7 @@
  * MCP Server Registration
  * Registers tools with the MCP server, filtered by user permissions.
  * 
- * Admin users: all 20 tools
+ * Admin users: all tools
  * Dept heads: only their department tools, with dept-restricted cost_per_hour
  */
 
@@ -101,6 +101,31 @@ import {
   createPaymentRequest, listPaymentRequests, getPaymentRequest,
   updatePaymentRequest, deletePaymentRequest,
 } from '@/src/tools/payment-requests';
+import { registerSpecs, type AnyToolSpec } from '@/src/tools/spec';
+import { dunningSpecs } from '@/src/tools/dunning';
+import { hubHoursSpecs } from '@/src/tools/hub-hours';
+import { plForecastSpecs } from '@/src/tools/pl-forecast';
+import { holdedSpecs } from '@/src/tools/holded';
+import { pandadocSpecs } from '@/src/tools/pandadoc';
+import {
+  settingsSpecs, usersAdminSpecs, clientsProfitabilitySpecs, commissionsExtrasSpecs,
+} from '@/src/tools/admin-extras';
+
+/**
+ * Newer modules, described declaratively (see src/tools/spec.ts).
+ * Admin-only: none of these names is in DEPT_HEAD_TOOLS.
+ */
+export const SPEC_TOOLS: readonly AnyToolSpec[] = [
+  ...dunningSpecs,
+  ...hubHoursSpecs,
+  ...plForecastSpecs,
+  ...holdedSpecs,
+  ...pandadocSpecs,
+  ...settingsSpecs,
+  ...usersAdminSpecs,
+  ...clientsProfitabilitySpecs,
+  ...commissionsExtrasSpecs,
+];
 
 // --- Shared Zod shapes ---
 const yearShape = { year: z.number().int().min(1000).max(9999).describe('4-digit year (e.g., 2025)') };
@@ -1369,4 +1394,7 @@ export function registerTools(server: McpServer, options?: RegisterToolsOptions)
     'Replace department splits for a payroll record.',
     { id: z.string().uuid(), splits: z.array(z.unknown()) },
     setPayrollSplits);
+
+  // ---------------- Newer modules (declarative specs) ----------------
+  registerSpecs(server, SPEC_TOOLS, (name) => shouldRegister(name, allowedTools));
 }

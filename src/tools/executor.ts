@@ -6,6 +6,7 @@
 import { callFinanceApi } from '@/src/lib/api';
 import { buildSuccess, buildErrorFromUnknown } from '@/src/lib/response';
 import { logger } from '@/src/lib/logging';
+import { redactSecrets } from '@/src/lib/redact';
 import type { ToolResponse } from '@/src/types';
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -61,7 +62,7 @@ export async function executeTool(options: ExecuteToolOptions): Promise<ToolResp
       tool,
       source,
       params,
-      data,
+      data: redactSecrets(data),
       durationMs,
     });
   } catch (err) {

@@ -16,6 +16,11 @@
 // heads via DEPT_HEAD_TOOLS below). The "Admin-only extras" blocks
 // were added later to expose the full Finance API surface — they are
 // NOT included in DEPT_HEAD_TOOLS, so only admin users receive them.
+//
+// Newer modules (impagos/dunning, hub hours, P&L scenarios & forecast,
+// cuadro de mando, Holded, PandaDoc, settings, users, year management…)
+// are declared in src/tools/*.ts as specs and collected in SPEC_TOOLS
+// (src/tools/register.ts). They are admin-only as well.
 // ============================================
 const ALL_TOOLS = [
   // ---- Core (admin + dept-head allowed) ----

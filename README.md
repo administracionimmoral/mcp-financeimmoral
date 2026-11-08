@@ -1,13 +1,13 @@
 # Immoral Finance MCP Server
 
-Remote MCP (Model Context Protocol) server that connects **Claude** to the **Immoral Finance REST API**. Exposes 20 whitelisted financial tools — no proxy, no arbitrary endpoints, no frontend.
+Remote MCP (Model Context Protocol) server that connects **Claude** to the **Immoral Finance REST API**. Exposes ~250 whitelisted financial tools (filtered per user) — no proxy, no arbitrary endpoints, no frontend.
 
 ## Stack
 
 - **Runtime**: Node.js 20+
 - **Language**: TypeScript (strict)
 - **Framework**: Next.js 16 App Router (backend only)
-- **MCP**: `mcp-handler` (Streamable HTTP + SSE)
+- **MCP**: `@modelcontextprotocol/sdk` (stateless Streamable HTTP) + OAuth 2.1 (Auth0)
 - **Validation**: Zod (strict schemas, no extra properties)
 - **HTTP Client**: Native `fetch` with timeout via `AbortController`
 - **Deploy**: Vercel (serverless)
@@ -31,7 +31,7 @@ immoral-finance-mcp/
 │   │   ├── logging.ts                 # JSON structured logger
 │   │   └── response.ts               # Response builder (success/error)
 │   ├── schemas/
-│   │   └── index.ts                   # Zod schemas for all 20 tools
+│   │   └── index.ts                   # Zod schemas (legacy core tools)
 │   ├── tools/
 │   │   ├── register.ts                # MCP server tool registration
 │   │   ├── executor.ts                # Tool execution orchestrator
@@ -148,7 +148,7 @@ https://immoral-finance-mcp.vercel.app/api/mcp
    https://your-project.vercel.app/api/mcp
    ```
 4. Save and restart Claude
-5. Claude should now detect all 20 tools
+5. Claude should now detect the tools allowed for your user
 
 ### Claude Code (CLI)
 
@@ -161,9 +161,24 @@ claude mcp add --transport http immoral-finance https://your-project.vercel.app/
 Ask Claude:
 > "¿Qué herramientas de Immoral Finance tienes disponibles?"
 
-Claude should list all 20 tools.
+Claude should list the tools allowed for your user (admins see all).
 
-## Tools (20 total)
+## Newer modules (admin only)
+
+Declared as specs in `src/tools/*.ts` (see `src/tools/spec.ts`) and collected in `SPEC_TOOLS` in `src/tools/register.ts`:
+
+| Module | File | Notes |
+|---|---|---|
+| Impagos (dunning) | `dunning.ts` | **Read only**: overdue invoices, cases, reminders, stats, effectiveness, config, templates, responsables. Needs the Finance app to accept API keys on GET `/admin/dunning/*`. |
+| Hub hours / hub adjustments | `hub-hours.ts` | Allocation per person, manual hours, ClickUp sync, month close/reopen, mappings |
+| P&L scenarios, forecast versions, cuadro de mando | `pl-forecast.ts` | |
+| Holded | `holded.ts` | Invoices, documents, contacts, treasury; create/pay/send invoice |
+| PandaDoc | `pandadoc.ts` | Templates, documents, mappings; PDF download and previews not exposed |
+| Settings, year management, users, clients/profitability/commissions extras | `admin-extras.ts` | No user creation or password changes via MCP |
+
+All responses go through `src/lib/redact.ts`, which strips credential fields (`raw_password`, `key_hash`, tokens…).
+
+## Core tools (original set)
 
 ### Billing (2)
 | Tool | Description | Parameters |

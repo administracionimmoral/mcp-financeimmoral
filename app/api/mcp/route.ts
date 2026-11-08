@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   // --- 3. Create MCP server with filtered tools ---
   const server = new McpServer({
     name: 'immoral-finance-mcp',
-    version: '1.0.0',
+    version: '1.1.0',
   });
 
   // Register only the tools this user is allowed to see
